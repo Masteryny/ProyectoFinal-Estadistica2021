@@ -449,7 +449,7 @@ plot(seriebitcoinacs)
 
 componentesacs = decompose(seriebitcoinacs)
 
-plot(componentesmes)
+plot(componentesacs)
 
 Bitcoin2021acs = window(seriebitcoinacs, start=2017,end=2021)
 
