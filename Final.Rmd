@@ -1,0 +1,542 @@
+---
+title: "Proyecto Final"
+author: "Elman Estuardo Camó Morales&Ever Geovany Sical López"
+date: "2/6/2021"
+output: word_document
+---
+
+```{r}
+library(readr)
+library(ggplot2)
+library(lubridate)
+library(forecast)
+library(tidyverse)
+library(nortest)
+```
+
+
+```{r}
+csgo_round_snapshots <- read.csv("C:/Users/Prototype2B/Desktop/csgo_round_snapshots.csv", header=TRUE)
+bitcoin<- read.csv("C:/Users/MasterYny/Desktop/final_Bitcoin_dataset.csv", header=TRUE)
+test<- read.csv("C:/Users/MasterYny/Desktop/test.csv", header=TRUE)
+```
+
+# Analisis 1
+
+Demostrar si existe alguna correlacion entre las variables ct_money y ct_score
+
+h0: No existe correlacion ente ambas variables 
+
+h1: Existe correlacion entre ambas variables
+
+MODELO: T.CORRELACIOON
+
+GRAFICO: DISPERCION
+
+```{r}
+plot(csgo_round_snapshots$ct_score,csgo_round_snapshots$ct_money,col="blue",main="Correlacion entre ct_score y ct_money",xlab="ct_score",ylab="ct_money")
+abline(lm(csgo_round_snapshots$ct_money ~ csgo_round_snapshots$ct_score), col = 'red', lwd = 3)
+cor(csgo_round_snapshots$ct_score,csgo_round_snapshots$ct_money)
+0.249416<0.05
+```
+
+Dado el analisis, la grafica y nuestro pvalue se puede determinar que la variable ct_money y t_money no es dependiente del ct_score y t_score por lo tanto "se afirma H1"
+Una investigacion que se realizo por cuenta propia quedo demostrado que en el juego de Counter Strike Gloval Ofencive el score no influye de forma directa en el dinero que se gana por ronda es decir no importa cuantas kills se tengan si se pierde la ronda se ganara menos dinero. (CLIP DE VIDO DEMOSTRATIVO)
+
+
+
+
+# Análisis 2
+
+Realize un analisis entre las variables bomb_planted y map.
+
+H0: La difuclta para plantar la bomba es la misma en todos los mapas
+
+H1: La difuclta para plantar la bomba no es la misma en todos los mapas
+
+MODELO:chi.test
+
+GRAFICO: mosaico
+
+```{r}
+tabla <- table(csgo_round_snapshots$map,csgo_round_snapshots$bomb_planted, dnn=c("Bomba plantada"))
+mosaicplot(tabla, main = deparse("Mapa"))
+tabla
+chisq.test(tabla)
+ 2.2e-16<0.05
+```
+Demostrando de forma numerico y grafica, el analisis nos indica que la dificultad para plantar la bomba es distinta en cada mapa por lo tanto "se afirma H1"
+
+Este análisi puede tomar mejor sentido y forma si tomamos jugadas de jugadores profecionales e incluso en partidas casuales (CLIP DE VIDEO CON TOMAS PANORAMICAS Y SIMULACION)
+
+
+# Analisis 3
+Realize un analisis para demostrar cual es la media de kit de defuse en base al mapa
+
+H0: No existe diferencia en la media de compra de kits de defuse por mapa
+
+H1: En algunos casos existe difetencia en la media de compra de kits de defuse por mapa
+
+Grafico: ggplot
+
+Modelo: Anova
+
+
+```{r}
+ggplot(data= csgo_round_snapshots, aes(x=ct_defuse_kits, y=,color=map ))+geom_boxplot()+theme_bw()
+anova <- aov(csgo_round_snapshots$ct_defuse_kits~csgo_round_snapshots$map)
+summary(anova)
+```
+Dado el resultado podemos demostrar que la media de kit de defuse es de 1 por ronda esto explicado mejor en el (clip) por lo tanto "no se rechaza H0"
+
+# Analisis 4
+
+Determinar si el chaleco restante ct esta relacionada con el casco restante  ct
+
+H0:La variable ct_helmet no es dependiente de la variable ct_armor
+
+H1:La variable ct_helmet es dependiente de la variable ct_armor
+
+Grafico: Dispersion
+
+Modelo: Correlacion
+
+```{r}
+plot(csgo_round_snapshots$ct_armor,csgo_round_snapshots$ct_helmets,col="blue",main="Correlacion entre ct_helmet y ct_armor",xlab="ct_armor",ylab="ct_helmets")
+abline(lm(csgo_round_snapshots$ct_helmets ~ csgo_round_snapshots$ct_armor), col = 'red', lwd = 3)
+cor(csgo_round_snapshots$ct_armor,csgo_round_snapshots$ct_helmets)
+```
+Dada la grafica y el analisis podemos demostrar que el helmet es dependiente de armor por tanto no se rechaza H0
+(CLIP DEMOSTRATIVO)
+
+# Analisis 5
+
+Determine si existe diferencia de media en compras de AK47 segun el mapa jugado
+
+Grafica:ggplot
+
+Modelo: anova
+
+h0: no existe diferencia en la compra de 1 ak47
+
+h1: en algunos casos existe diferenica en la compra de 1 ak47
+
+```{r}
+ggplot(data= csgo_round_snapshots, aes(x=t_weapon_ak47, y=,color=map ))+geom_boxplot()+theme_bw()
+anova <- aov(csgo_round_snapshots$t_weapon_ak47~csgo_round_snapshots$map)
+summary(anova)
+
+```
+Dado el resultado y la grafica se puede determinar que la media sera de por lo menos 1 ak47 comprada en las rodondas por lo tanto "no se rechaza H0"
+
+
+# Analisis 6
+
+Detenerminar si el tiempo restante tendra una diferencia significativa en el estado en el que se enconbtro la bomba antes de acabar la ronda
+
+H0: El tiempo restante tendra una diferencia significativa en el estado en el que se enconbtro la bomba antes de acabar la ronda
+
+H1: El tiempo restante no tendra una diferencia significativa en el estado en el que se enconbtro la bomba antes de acabar la ronda
+
+Grafica: Boxplot
+
+Modelo: T.test
+
+```{r}
+boxplot(time_left~bomb_planted, data=csgo_round_snapshots, col=c("red","blue"))
+t.test(csgo_round_snapshots$time_left~csgo_round_snapshots$bomb_planted, alternative="two.sided")
+```
+Dado el analisis y la grafica se puede demostrar que H0 no se rechaza y se puede demostrar de forma real con un clip que el tiempo restante esta relacionado con la bomba plantada
+
+
+# Analisis 7
+
+Determine si existe diferencia de media en compras de m4a4 ct segun el mapa jugado
+
+Grafica:ggplot
+
+Modelo: anova
+
+h0: no existe diferencia en la compra de 1 m4a4
+
+h1: en algunos casos existe diferenica en la compra de 1 m4a4
+
+```{r}
+ggplot(data= csgo_round_snapshots, aes(x=ct_weapon_m4a4, y=,color=map ))+geom_boxplot()+theme_bw()
+anova <- aov(csgo_round_snapshots$ct_weapon_m4a4~csgo_round_snapshots$map)
+summary(anova)
+```
+Dado el resultado y la grafica se puede determinar que la media sera de por lo menos 1 m4a4 CT comprada en las rodondas por lo tanto "no se rechaza H0"
+
+# DataSet de Datos Aviones
+
+# Analisis 8
+
+Determinar si la edad del individuo es a partir de la distancia que viaja cada uno de estos demuestrelo graficamente como analiticamente
+
+Modelo = Correlacion
+
+Grafico = Dispersion
+
+H0: La edad de la persona no influye en la distancia de vuelo
+
+H1: La edad de la persona influye en la distancia de vuelo
+
+```{r}
+plot(test$Flight.Distance,test$Age,col="blue",main="Correlacion la Edad y la distancia de vuelo",xlab="Distancia de Vuelo",ylab="Edad")
+abline(lm(test$Age ~ test$Flight.Distance), col = 'red', lwd = 3)
+cor(test$Flight.Distance,test$Age)
+#pvalue<0.05
+0.09940871<0.05
+```
+
+Como se demuestra que el pvalue es menor no tenemos pruebas suficientes para rechazar H0 y por ende podemos confirmar de que la edad de la persona no influye en la distancia de vuelo que viaja el individuo
+
+# Analisis 9
+
+Determine graficamente y por medio de un analisis si la clase en la que vuela el individuo esta relacionado en base al tipo de cliente que es el individuo.
+
+Modelo = Test chi cuadrado
+
+Grafica = Mosaic plot
+
+H0: A mejor tipo de cliente no es mejor es la clase en la que vuela
+
+H1: A mejor tipo de cliente mejor la clase en la que vuela
+```{r}
+tablaclc <- table(test$Customer.Type,test$Class, dnn=c("Tipo de Cliente","Clase"))
+mosaicplot(tablaclc,color = "skyblue2", main = deparse("Relación entre Tipo de Cliente y Clase"))
+tablaclc
+chisq.test(tablaclc)
+#pvalue<0.05
+2.2e-16<0.05
+```
+
+Existen suficientes pruebas para afirmar H1 por ende se puede decir que la lealtad del cliente si influye en el tipo de clase que este viaja, graficamente observamos que los tipos de cliente "Leales" tienden a viajar mas en primera clase de aque aquellos que "No son leales" en la grafica se muestra que este tipo de cliente tienede a viajar mas economicamente.
+
+# Analisis 10
+
+Por medio de un analisis comprobar graficamente y analiticamente si existe una diferencia significativa entre la califiacion de la comida y bebida que ponen los individuos en base al genero sea hombre o mujer.
+
+Modelo = t.test
+
+Grafica = Boxplot
+
+H0:La satisfaccion de comida y bebida no depende de la genero
+
+H1:La satisfaccion de comida y bebida depende del genero
+```{r}
+boxplot(Food.and.drink~Gender, data=test, col=c("blue","royalblue"))
+t.test(test$Food.and.drink~test$Gender, alternative="two.sided")
+0.0201<0.05
+```
+
+Podemos ver que nuestro pvalue es menor asi afirmando H1 diciendo que la nota que asignan los individuos depende del genero, aunque graficamente no se ve podemos decir que las mujeres califican un poco mas alto la comida y bebida, esto se ve en la media de cada uno, la diferencia no es tan grande pero nos muestra que existe como tal.
+
+# Analisis 11
+
+La calificacion que dan los individuos del nivel de abordaje estara relacionado co la calificacion que se le da al nivel de entretenimiento que se le da en el vuelo.
+
+Modelo = Correlacion
+
+Grafico = Dispersion
+
+H0: La nota asiganada nivel de abordaje no depende de la nota que se asigna al entretenimiento del vuelo
+
+H1: La nota asiganada nivel de abordaje depende de la nota que se asigna al entretenimiento del vuelo
+```{r}
+plot(test$On.board.service,test$Inflight.entertainment,col="blue",main="Correlaion entre calificacion de abordaje y calificacion de entretenimiento",xlab="Califiacion de Abordaje",ylab="Calificacion de Entretenimientp")
+abline(lm(test$Inflight.entertainment ~ test$On.board.service), col = 'red', lwd = 3)
+cor(test$On.board.service,test$Inflight.entertainment)
+#pvalue<0.05
+0.4122661<0.05
+```
+No existen suficientes pruebas para rechazar H0 asi que podeemos decir que el nivel de abordaje que se brinda no tiene depende de la nota asignada al entretenimiento.
+
+# Analisis 12
+
+Realice un analisis donde se demuestre si el tipo de satisfaccion que asigno el individuo depende si este es hombre o mujer
+
+Modelo = Test chi cuadrado
+
+Grafica = Mosaic plot
+
+H0: La nota asignada no depende si es hombre o mujer
+
+H1: La nota asignada depende si es hombre o mujer
+
+```{r}
+tablagen <- table(test$Gender,test$satisfaction, dnn=c("Genero","Satisfaccion"))
+mosaicplot(tablagen, main = deparse("Relación entre Genero y Satisfaccion"))
+tablagen
+chisq.test(tablagen)
+#pvalue<0.05
+0.2421<0.05
+```
+
+El pvalue obtenido es mayor asi que no se rechaza H0, y podemos decir que el nivel de satisfaccion que recibe cada uno no depende si este sea hombre o mujer.
+
+# Analisis 13
+
+Realice un analisis para comprobarar si la satisfaccion que asigna cada individuo depende de la edad del individuo
+
+Modelo = t.test
+
+Grafica = Boxplot
+
+H0: La edad no influye en el nivel de satisfaccion
+
+H1: La edad influye en el nivel de satisfaccion
+```{r}
+boxplot(Age~satisfaction, data=test, col=c("red","royalblue"))
+t.test(test$Age~test$satisfaction, alternative="two.sided")
+2.2e-16<0.05
+```
+
+Debido a los suficientes datos que tenemos, afirmamos H1, y llegamos a la conclusion La edad influye en el nivel de satisfaccion que asignan cada indiduo llega a ser mayor en personas que tienen una edad de 41 años.
+
+# Analisis 14
+
+Comprobar si el retraso de salida del avion esta relacionado en base al retraso de llegada de este mismo
+
+Modelo = Correlacion
+
+Grafico = Dispersion
+
+H0: El retraso del llegada del avion no depende del retraso de salida del mismo
+
+H1: El retraso del llegada del avion depende del retraso de salida del mismo
+```{r}
+plot(test$Arrival.Delay.in.Minutes,test$Departure.Delay.in.Minutes,col="blue",main="Correlacion e retraso de salida y el retraso de llegada del avion",xlab="Restraso de Llegada",ylab="Retraso de Salida")
+abline(lm(test$Departure.Delay.in.Minutes ~ test$Arrival.Delay.in.Minutes), col = 'red', lwd = 3)
+cor(test$Arrival.Delay.in.Minutes,test$Departure.Delay.in.Minutes)
+#pvalue<0.05
+NA<0.05
+```
+Debido a que el grado de correlacion es NA podemos determinar que no existe una relacion directa sobre el retraso de salida y el retraso de entrada que tiene el avion asi que no podemos rechazar H0.
+
+# Set de datos Cryptomonedas
+
+# Analisis 15
+
+Realice un Analsis para ver el movimento de la tasa del bitcoin de aca a 15 meses en el periodo de 2021 encontrar cual es la prediccion con menos tasa de error.
+
+Modelo: Window, ARIMA, HoltWinters
+
+Grafico: Series de Tiempo
+```{r}
+bitcoin$fecha = as.Date(bitcoin$Timestamp,format="%Y-%m-%d","%H:%M:%S")
+
+bitcoin$sem = week(bitcoin$fecha)
+
+bitcoin$year = year(bitcoin$fecha)
+
+bitcoinsemanal = bitcoin %>% group_by(year,sem) %>% summarise(media=mean(High))
+
+seriebitcoin = ts(bitcoinsemanal$media, start=c(2017,1),frequency = 52)
+
+plot(seriebitcoin)
+
+componentes = decompose(seriebitcoin)
+
+plot(componentes)
+
+Bitcoin2021 = window(seriebitcoin, start=2017,end=2021)
+
+pre1=forecast(Bitcoin2021,15)
+
+plot(pre1)
+
+ms=auto.arima(Bitcoin2021)
+
+pre2=forecast(ms,15)
+
+plot(pre2)
+
+modHT = HoltWinters(Bitcoin2021)
+
+pre3 = forecast(modHT,15)
+
+plot(pre3)
+
+accuracy(pre1)
+
+accuracy(pre2)
+
+accuracy(pre3)
+```
+
+Llegamos a la conlcusion de que el metodo con menos tasa de error es el Arima asi concluyendo que la subida del bitcon permanecera estable en un aproximado de 190,000
+dolares
+
+
+
+# Analisis 16
+
+Demuestre medio un histograma si existe diferencia entre las medias de subida y bajada ademas de comprobar si existe normalidad en los datos
+
+Modelo: Test de Normalidad
+
+Grafico: Histograma
+
+H0: Existe Normalidad en los datos
+
+H1: No existe normalidad en los datos
+```{r}
+summary(bitcoin)
+
+par(mfrow=c(1,2))
+
+hist(bitcoin$High,col="red")
+mediaus <- mean(bitcoin$High)
+abline(v=mediaus,col="black")
+mediaus
+medianaus <- median(bitcoin$High)
+abline(v=medianaus,col="black")
+medianaus
+
+hist(bitcoin$Low,col="red")
+medial <- mean(bitcoin$Low)
+abline(v=medial,col="black")
+medial
+medianal <- median(bitcoin$Low)
+abline(v=medianal,col="black")
+medianal
+
+lillie.test(bitcoin$High)
+lillie.test(bitcoin$Low)
+2.2e-16<0.05
+```
+
+Existe diferencia estadistica para poder rechazar H0, por ende ninguna de las graficas muestra que tengan normalidad como tal.
+
+# Analisis 17
+
+Tendra alguna correlacion el Precio ponderado del Bitcon y el precio de cerrada que se le asigna tambien ha este.
+
+Modelo: Correlacion
+
+Grafico: Dispersion
+
+H0: Ambas variables tienen una relacion
+
+H1: Ninguna de las variables tiene una relacion
+
+```{r}
+plot(bitcoin$Weighted_Price,bitcoin$Close,col="blue",main="Correlacion entre el Precio ponderado y precio de cerrada",xlab="Precio Ponderado BTC",ylab="Cerrada BTC")
+abline(lm(bitcoin$Close ~ bitcoin$Weighted_Price), col = 'red', lwd = 3)
+cor(bitcoin$Weighted_Price,bitcoin$Close)
+0.9999964<0.05
+```
+
+No tenemos suficientes datos para poder rechazar H0 asi que por ende la vairable de ponderado BTC tiene una relacion con el precio de cerrada que se le da al BTC.
+
+
+# Analisis 18
+
+Prufundizar en el mercado de divisas para observar los mas relevantes si ha aumentado o disminuido hasa el año actual
+
+Modelo: Window, ARIMA, HoltWinters
+
+Grafico: Series de Tiempo
+
+```{r}
+bitcoinacs = bitcoin %>% group_by(year,sem)%>%summarise(media=mean(Volume_.Currency.))
+
+seriebitcoinacs = ts(bitcoinacs$media, start=c(2017,1),frequency = 52)
+
+plot(seriebitcoinacs)
+
+componentesacs = decompose(seriebitcoinacs)
+
+plot(componentesmes)
+
+Bitcoin2021acs = window(seriebitcoinacs, start=2017,end=2021)
+
+pre1acs=forecast(Bitcoin2021acs,24)
+
+plot(pre1acs)
+
+macs=auto.arima(Bitcoin2021acs)
+
+pre2acs=forecast(macs,24)
+
+plot(pre2acs)
+
+modHTacs = HoltWinters(Bitcoin2021acs)
+
+pre3acs = forecast(modHTacs,24)
+
+plot(pre3acs)
+
+accuracy(pre1acs)
+
+accuracy(pre2acs)
+
+accuracy(pre3acs)
+```
+# Analisis 19
+
+Explicar cual fue el volumen de bitcoin, ademas de hacer una prediccon de como cambiara a 8 meses despues
+
+Modelo: Window, ARIMA, HoltWinters
+
+Grafico: Series de Tiempo
+```{r}
+bitcoinmens = bitcoin %>% group_by(year,sem) %>% summarise(media=mean(Volume_.BTC.))
+
+seriebitcoinmes = ts(bitcoinmens$media, start=c(2017,1),frequency = 52)
+
+plot(seriebitcoinmes)
+
+componentesmes = decompose(seriebitcoinmes)
+
+plot(componentesmes)
+
+Bitcoin2021mes = window(seriebitcoinmes, start=2017,end=2021)
+
+pre1mes=forecast(Bitcoin2021mes,8)
+
+plot(pre1mes)
+
+mse=auto.arima(Bitcoin2021mes)
+
+pre2mes=forecast(mse,8)
+
+plot(pre2mes)
+
+modHTmes = HoltWinters(Bitcoin2021mes)
+
+pre3mes = forecast(modHTmes,8)
+
+plot(pre3mes)
+
+accuracy(pre1mes)
+
+accuracy(pre2mes)
+
+accuracy(pre3mes)
+
+```
+Podemos observar que la fecha mas relevante durante el periodo de finales de 2018 e inicios del 2019 debido a una abaja del precio en 2018
+
+# Analisis 20
+
+Analizar graficamente y analiticamente si existe una relacion entre Volumen del BTC y el Volumende de 
+Divisas.
+
+Modelo: Correlacion
+
+Grafico: Dispersion
+
+H0: Existe una relacion entra la variable BTC y el Volumen de Divisas
+
+H1: No existe una relacion entra la variable BTC y el Volumen de Divisas
+```{r}
+plot(bitcoin$Volume_.BTC.,bitcoin$Volume_.Currency.,col="blue",main="Correlacion entre el Precio ponderado y precio de cerrada",xlab="Precio Ponderado BTC",ylab="Cerrada BTC")
+abline(lm(bitcoin$Volume_.Currency. ~ bitcoin$Volume_.BTC.), col = 'red', lwd = 3)
+cor(bitcoin$Volume_.BTC.,bitcoin$Volume_.Currency.)
+0.9999964<0.05
+```
+
+No tenemos suficientes datos para afirmar lo H1 asi que no se rechaza H0 ya que el valor es demasiado alto y a su vez es positivo asi que podemos decir que existe una relacion entre ambas variables
