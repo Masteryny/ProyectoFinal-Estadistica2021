@@ -14,3 +14,4 @@ Datase de Rondas CSGO
 
 https://www.kaggle.com/christianlillelund/csgo-round-winner-classification
 
+PD: El Archivo de la Tasa de Cambio del Bitcoin pesa aprox 302 Mb, lo cual no permite subirlo a GitHub
